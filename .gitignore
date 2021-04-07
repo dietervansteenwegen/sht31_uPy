@@ -150,5 +150,8 @@ settings.json
 .pylintrc
 pymakr.conf
 
-### Credentials file ###
-credentials
+### Credentials file
+credentials*
+
+### scratchpad directory
+scratchpad/
