@@ -31,15 +31,18 @@ class SHT31:
             return None
         # print('STH31 found and initialized...')
 
+
     def _search_device(self) -> bool:
         devices_found = self.i2c.scan()
         return SHT31_DEVICE_ADDRESS in devices_found  # returns True if the device is found
-            
+  
+  
     def _initialize(self) -> None:
         self.i2c.writeto(SHT31_DEVICE_ADDRESS, bytearray([CMD_SOFT_RESET_ADDR, CMD_SOFT_RESET_VAL]))  # reset
         sleep_ms(2)  # 0.5 to 1 ms according to datasheet
         # TODO: add check? Nothing is returned, maybe read? another scan?
 
+        
     def measure(self, temp_round_to:int = 2, rh_round_to:int = 0) -> tuple:
         self.i2c.writeto(SHT31_DEVICE_ADDRESS, bytearray([CMD_SSHIGHREP_ADDR,CMD_SSHIGHREP_VAL]) )  # trigger (high repeatability, clock stretching en.)
         sleep_ms(20)  # 12.5 to 15 ms for high repeatability according to datasheet
@@ -49,7 +52,8 @@ class SHT31:
             print('CRC failed')
             return (None, None)
         return self._convert_raw(res, temp_round_to, rh_round_to)
-    
+ 
+
     def _convert_raw(self,data: bytearray, temp_round_to:int = 2, rh_round_to:int = 0) -> tuple:
         rh_raw = (data[3] << 8) + data [4]
         rh = 100 * (rh_raw / 65535)
@@ -58,9 +62,10 @@ class SHT31:
         temp_raw = (data[0] << 8) + data [1]
         temp_C = -45 + 175*(temp_raw/65535)
         temp_C = int(round(temp_C, 0)) if temp_round_to == 0 else round(temp_C, temp_round_to)
-
+        
         return temp_C, rh
 
+      
     def _verify_CRC8(self, data:bytearray) -> bool:
         """ Calculate and verify CRC for 2 bytes of data.
         Expects a bytearray of 3 bytes: two data bytes and one CRC.
@@ -86,6 +91,7 @@ class SHT31:
                     ((crc << 1) ^ CRC_POLYNOMIAL) & 0xFF if (crc & 0x80)
                     else (crc << 1) & 0xFF
                     )
+
 
                 byte >>= 1  # shift to next bit
 
